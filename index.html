@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WorldShares — International Stocks</title>
+<style>
+:root{--bg:#0b1020;--panel:#121a2e;--panel2:#18223a;--text:#edf2ff;--muted:#9ba9c7;--line:#293653;--green:#36d399;--blue:#7c9cff;--red:#ff7b8b}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#0b1020,#101a30);color:var(--text);font:15px/1.5 system-ui,Segoe UI,sans-serif}
+button,input{font:inherit}button{cursor:pointer;border:0;border-radius:9px;padding:10px 13px;font-weight:700}.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}.sidebar{padding:24px 18px;border-right:1px solid var(--line);background:#0c1325}.brand{font-size:21px;font-weight:850;margin-bottom:28px}.brand span{color:var(--green)}.sidebar p{font-size:12px;color:var(--muted)}main{padding:26px;max-width:1400px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}.top h1{margin:4px 0;font-size:27px}.muted{color:var(--muted);font-size:13px}.pill{border:1px solid var(--line);border-radius:999px;padding:7px 11px;color:var(--green);font-size:12px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:17px;min-width:0}.metric{font-size:25px;font-weight:800;margin:7px 0}.head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:25px 0 12px}.head h2{margin:0;font-size:18px}.search{max-width:320px;width:100%;background:var(--panel);border:1px solid var(--line);padding:10px 12px;color:var(--text);border-radius:9px}.cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.8fr);gap:14px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap}th,td{text-align:left;padding:12px 8px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-size:12px}.company{color:var(--muted);font-size:11px}.buy{background:var(--green);color:#062118;padding:7px 10px}.star{background:var(--panel2);color:var(--text);padding:7px 9px}.field{margin:13px 0}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}.field input{width:100%;padding:11px;background:#0d1426;border:1px solid var(--line);border-radius:8px;color:var(--text)}.primary{width:100%;background:var(--blue);color:#091126}.secondary{background:var(--panel2);color:var(--text)}.warning{margin-top:12px;padding:11px;border:1px solid #65502a;background:#2b2518;color:#f7d99a;border-radius:9px;font-size:12px}.auth{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.auth input{width:170px;max-width:42vw;background:#0d1426;border:1px solid var(--line);border-radius:8px;padding:9px;color:var(--text)}.list{display:grid;gap:8px}.item{display:flex;justify-content:space-between;gap:10px;background:var(--panel2);border-radius:9px;padding:11px}.item small{display:block;color:var(--muted)}.message{margin:12px 0;color:var(--green);font-size:13px;min-height:20px}.footer{text-align:center;color:var(--muted);font-size:11px;margin:24px 0}.hidden{display:none!important}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{display:none}.cols{grid-template-columns:1fr}main{padding:15px}}@media(max-width:560px){.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.head{align-items:flex-start;flex-direction:column}.search{max-width:none}.auth input{width:100%;max-width:none}.auth{width:100%}.auth input{flex:1}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar"><div class="brand">World<span>Shares</span></div><p>INTERNATIONAL STOCKS</p><p>Dashboard</p><p>Global markets</p><p>Watchlist</p><p>Demo order history</p><div class="warning">Demo only. This app is not a broker and cannot place real trades.</div></aside>
+<main>
+<header class="top"><div><div class="muted">GLOBAL INVESTING WORKSPACE</div><h1>International stocks</h1><div class="muted">Browse sample listings and save your own watchlist</div></div><span class="pill" id="connection">Supabase not configured</span></header>
+<section class="grid"><div class="card"><div class="muted">Demo portfolio</div><div class="metric">$10,000.00</div><div class="muted">Illustrative only — not real funds</div></div><div class="card"><div class="muted">Watchlist items</div><div class="metric" id="watchCount">0</div><div class="muted">Saved to your account when signed in</div></div><div class="card"><div class="muted">Markets represented</div><div class="metric">4</div><div class="muted">US · UK · Japan · Europe</div></div></section>
+<section class="card" style="margin-top:15px">
+<div class="head" style="margin-top:0"><h2>Account access</h2><span class="muted">Email and password</span></div>
+<div class="auth"><input id="email" type="email" placeholder="Email address" autocomplete="email"><input id="password" type="password" placeholder="Password (min. 8 chars)" autocomplete="current-password"><button class="buy" id="signup">Create account</button><button class="secondary" id="login">Log in</button><button class="secondary hidden" id="logout">Log out</button></div>
+<div id="authState" class="message" role="status">Add your Supabase URL and publishable key in the script before using account features.</div>
+</section>
+<div class="head" id="markets"><h2>Explore global stocks</h2><input id="search" class="search" type="search" placeholder="Search company, ticker or market…"></div>
+<section class="cols">
+<div class="card tablewrap"><table><thead><tr><th>Company</th><th>Market</th><th>Example price</th><th>Change</th><th>Action</th></tr></thead><tbody id="stockRows"></tbody></table><div class="muted" style="padding-top:10px">Prices are fictional interface examples, not live market quotes.</div></div>
+<div class="card"><h2 style="margin-top:0">Demo buy preview</h2><div class="muted">Stores a clearly marked preview record only.</div>
+<div class="field"><label for="stockSelect">Stock</label><select id="stockSelect" style="width:100%;padding:10px;background:#0d1426;border:1px solid var(--line);border-radius:8px;color:var(--text)"></select></div>
+<div class="field"><label for="shares">Number of shares</label><input id="shares" type="number" min="1" step="1" value="1"></div>
+<div class="muted">Estimated demo total: <strong id="estimate">$189.00</strong></div><button class="primary" id="preview" style="margin-top:13px">Save demo preview</button>
+<div class="warning">No real order, payment, deposit or brokerage transaction will happen.</div></div>
+</section>
+<section class="head"><h2>My watchlist</h2><span class="muted">Requires login to sync to Supabase</span></section><div class="card list" id="watchlist"><div class="muted">Log in to load your watchlist.</div></div>
+<section class="head"><h2>Recent demo previews</h2></section><div class="card list" id="orders"><div class="muted">Log in to load your saved demo previews.</div></div>
+<div id="message" class="message" role="status"></div>
+<div class="footer">WorldShares is an educational prototype, not a broker, investment adviser, or live trading platform.</div>
+</main></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0"></script>
+<script>
+/*
+  SETUP: Replace both placeholders with your Supabase project's URL and
+  publishable key. Never put a service_role or secret key in this file.
+*/
+const SUPABASE_URL = "https://fojpatxxcwunivpdwluj.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_dS3CZ1G3ABkjr4rSniZqOQ_nIoxqpvK";
+const configured = SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("YOUR_") && !SUPABASE_PUBLISHABLE_KEY.includes("YOUR_");
+const supabase = configured ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY) : null;
+const stocks=[
+{symbol:"AAPL",name:"Apple Inc.",market:"NASDAQ · US",price:189,currency:"USD",change:.84},
+{symbol:"MSFT",name:"Microsoft Corp.",market:"NASDAQ · US",price:420.5,currency:"USD",change:1.12},
+{symbol:"AMZN",name:"Amazon.com Inc.",market:"NASDAQ · US",price:178.25,currency:"USD",change:-.35},
+{symbol:"GOOGL",name:"Alphabet Inc.",market:"NASDAQ · US",price:164.2,currency:"USD",change:.61},
+{symbol:"NVDA",name:"NVIDIA Corp.",market:"NASDAQ · US",price:118.75,currency:"USD",change:2.18},
+{symbol:"HSBA",name:"HSBC Holdings",market:"LSE · UK",price:8.25,currency:"GBP",change:.29},
+{symbol:"7203",name:"Toyota Motor",market:"Tokyo · Japan",price:2750,currency:"JPY",change:.47},
+{symbol:"SAP",name:"SAP SE",market:"Xetra · Germany",price:178.6,currency:"EUR",change:.33}
+];
+let user=null, saved=new Set();
+const $=id=>document.getElementById(id);
+const fmt=(n,c="USD")=>new Intl.NumberFormat("en-US",{style:"currency",currency:c,maximumFractionDigits:c==="JPY"?0:2}).format(n);
+function msg(t){$("message").textContent=t}
+function setAuth(t){$("authState").textContent=t}
+function renderRows(filter=""){
+ $("stockRows").innerHTML="";
+ stocks.filter(s=>(s.symbol+" "+s.name+" "+s.market).toLowerCase().includes(filter.toLowerCase())).forEach(s=>{
+ const tr=document.createElement("tr");
+ tr.innerHTML=`<td><strong>${s.symbol}</strong><div class="company">${s.name}</div></td><td>${s.market}</td><td>${fmt(s.price,s.currency)}</td><td style="color:${s.change>=0?"var(--green)":"var(--red)"}">${s.change>=0?"+":""}${s.change.toFixed(2)}%</td><td><button class="buy" data-buy="${s.symbol}">Buy</button> <button class="star" data-star="${s.symbol}">${saved.has(s.symbol)?"★":"☆"}</button></td>`;
+ $("stockRows").appendChild(tr);
+ });
+ document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{$("stockSelect").value=b.dataset.buy;estimate();$("shares").focus()});
+ document.querySelectorAll("[data-star]").forEach(b=>b.onclick=()=>toggleWatch(b.dataset.star));
+}
+function renderWatch(){ $("watchCount").textContent=saved.size; const box=$("watchlist");box.innerHTML="";
+ if(!user){box.innerHTML='<div class="muted">Log in to load your watchlist.</div>';return}
+ if(!saved.size){box.innerHTML='<div class="muted">No saved stocks. Press ☆ beside a stock to add it.</div>';return}
+ [...saved].forEach(sym=>{const s=stocks.find(x=>x.symbol===sym);if(!s)return;const d=document.createElement("div");d.className="item";d.innerHTML=`<div><strong>${s.symbol} · ${s.name}</strong><small>${s.market}</small></div><button class="secondary" data-remove="${sym}">Remove</button>`;box.appendChild(d)});
+ document.querySelectorAll("[data-remove]").forEach(b=>b.onclick=()=>toggleWatch(b.dataset.remove,true));
+}
+function renderOrders(items=[]){const box=$("orders");box.innerHTML="";if(!user){box.innerHTML='<div class="muted">Log in to load your saved demo previews.</div>';return}if(!items.length){box.innerHTML='<div class="muted">No demo previews saved.</div>';return}
+ items.forEach(o=>{const d=document.createElement("div");d.className="item";d.innerHTML=`<div><strong>${o.symbol} · ${o.quantity} share(s)</strong><small>DEMO PREVIEW · ${new Date(o.created_at).toLocaleString()}</small></div><strong>${fmt(Number(o.estimated_total),o.currency)}</strong>`;box.appendChild(d)})}
+async function loadAccount(){
+ if(!supabase)return;
+ const {data:{session}}=await supabase.auth.getSession();user=session?.user||null;
+ $("logout").classList.toggle("hidden",!user);$("signup").classList.toggle("hidden",!!user);$("login").classList.toggle("hidden",!!user);
+ if(!user){saved.clear();renderWatch();renderOrders();return}
+ setAuth("Signed in as "+user.email);
+ const {data:wl,error:we}=await supabase.from("stock_watchlist").select("symbol");
+ if(we){msg("Watchlist load failed: "+we.message);return}
+ saved=new Set((wl||[]).map(x=>x.symbol));renderWatch();
+ const {data:orders,error:oe}=await supabase.from("demo_stock_order_previews").select("id,symbol,quantity,currency,estimated_total,created_at").order("created_at",{ascending:false}).limit(10);
+ if(oe){msg("Order history load failed: "+oe.message);return}renderOrders(orders||[]);
+}
+async function toggleWatch(symbol,removeOnly=false){
+ if(!supabase||!user){msg("Configure Supabase and log in to save a watchlist.");return}
+ if(saved.has(symbol)){const {error}=await supabase.from("stock_watchlist").delete().eq("symbol",symbol);if(error){msg(error.message);return}saved.delete(symbol)}
+ else if(!removeOnly){const {error}=await supabase.from("stock_watchlist").insert({symbol});if(error){msg(error.message);return}saved.add(symbol)}
+ renderRows($("search").value);renderWatch();msg("Watchlist updated.");
+}
+function estimate(){const s=stocks.find(x=>x.symbol===$("stockSelect").value);const n=Math.floor(Number($("shares").value));$("estimate").textContent=s&&n>0?fmt(n*s.price,s.currency):"—"}
+$("search").addEventListener("input",e=>renderRows(e.target.value));
+$("stockSelect").innerHTML=stocks.map(s=>`<option value="${s.symbol}">${s.symbol} — ${s.name}</option>`).join("");
+$("stockSelect").onchange=estimate;$("shares").oninput=estimate;
+$("signup").onclick=async()=>{if(!supabase){setAuth("Add your Supabase URL and publishable key in this file first.");return}const email=$("email").value.trim(),password=$("password").value;if(!email||password.length<8){setAuth("Enter an email and a password of at least 8 characters.");return}const {error}=await supabase.auth.signUp({email,password});setAuth(error?error.message:"Signup submitted. Check your email if confirmation is enabled, then log in.")};
+$("login").onclick=async()=>{if(!supabase){setAuth("Add your Supabase URL and publishable key in this file first.");return}const {data,error}=await supabase.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error){setAuth(error.message);return}user=data.user;setAuth("Logged in.");await loadAccount()};
+$("logout").onclick=async()=>{if(supabase)await supabase.auth.signOut();user=null;saved.clear();setAuth("Logged out.");await loadAccount()};
+$("preview").onclick=async()=>{if(!supabase||!user){msg("Configure Supabase and log in before saving a demo preview.");return}const s=stocks.find(x=>x.symbol===$("stockSelect").value),quantity=Math.floor(Number($("shares").value));if(!s||quantity<1){msg("Enter a whole number of shares greater than zero.");return}const payload={symbol:s.symbol,quantity,currency:s.currency,estimated_total:Number((s.price*quantity).toFixed(2)),order_mode:"demo",status:"preview"};const {error}=await supabase.from("demo_stock_order_previews").insert(payload);if(error){msg("Could not save preview: "+error.message);return}msg("Demo preview saved. No real trade was placed.");await loadAccount()};
+if(supabase){$("connection").textContent="Supabase configured";supabase.auth.onAuthStateChange(()=>{loadAccount()});loadAccount()}else{$("connection").textContent="Supabase not configured";renderWatch();renderOrders()}
+renderRows();estimate();
+</script>
+</body></html>
